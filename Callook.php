@@ -14,32 +14,54 @@ $wgExtensionMessagesFiles['Callook'] = dirname( __FILE__ ) . '/Callook.i18n.php'
 
 function CallookSetupParserFunction( &$parser ) {
   $parser->setFunctionHook( 'callsign', 'CallsignFunction' );
+  $parser->setFunctionHook( 'callsignlist', 'CallsignListFunction' );
   $parser->setFunctionHook( 'callsignlink', 'CallsignLinkFunction' );
   return true;
 }
 
+/** Helper function to get callook JSON response. */
 function GetCallookJson( $callsign ) {
   $json = @file_get_contents( 'http://callook.info/' . urlencode( $callsign ) . '/json' );
   $json_decoded = json_decode( $json, true );
   return $json_decoded;
 } 
 
-function CallsignFunction( $parser, $callsign = '' ) {
+/** Format a callsign into the following format:
+    Name Here (<link to callook profile here>)
+*/
+function FormatSimple( $callsign ) {
   $json_decoded = GetCallookJson( $callsign );
   if ( $json_decoded === NULL ) {
-    return array ( 'Unable to look up callsign.', 'isHTML' => true );
+    return "* Unable to look up callsign.\n";
+  } else {
+    $name = ucwords( strtolower( htmlspecialchars( $json_decoded['name'] ) ) );
+    return $name . ' ([http://callook.info/' . urlencode( $callsign ) . ' ' .
+      strtoupper( $callsign ) . "])\n";
   }
-
-  $name = ucwords( strtolower( htmlspecialchars( $json_decoded['name'] ) ) );
-  $output = $name . ' (<a href="http://callook.info/' .
-    urlencode( $callsign ) . '">' . strtoupper( $callsign ) . '</a>)';
-
-  return array ( $output, 'isHTML' => true );
 }
 
-function CallsignLinkFunction( $parser, $callsign = '' ) {
-  $output = '<a href="http://callook.info/' . urlencode( $callsign ) . '">' .
-    strtoupper( $callsign ) . '</a>';
+/** Format a callsign by displaying the person's name and callsign (which is
+    linked to their callook.info profile.).
+*/
+function CallsignFunction( $parser, $callsign = '' ) {
+  return array ( FormatSimple( $callsign ) );
+}
 
-  return array ( $output, 'isHTML' => true );
+/** Link a callsign to its callook.info profile. **/
+function CallsignLinkFunction( $parser, $callsign = '' ) {
+  $output = '[http://callook.info/' . urlencode( $callsign ) . ' ' .
+    strtoupper( $callsign ) . ']';
+  return array ( $output );
+}
+
+/** Take a list of callsigns (comma-separated), and display their owner's name
+    and callsign (linked to callook.info) as a list element.
+*/
+function CallsignListFunction( $parser, $callsign = '' ) {
+  $callsigns = explode( ',', str_replace ( ' ', '', $callsign ) );
+  $output = '';
+  foreach ( $callsigns as $call ) {
+    $output .= '* ' . FormatSimple( $call );
+  }
+  return array ( $output );
 }
