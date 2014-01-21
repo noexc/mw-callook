@@ -32,11 +32,11 @@ function GetCallookJson( $callsign ) {
 function FormatSimple( $callsign ) {
   $json_decoded = GetCallookJson( $callsign );
   if ( $json_decoded === NULL ) {
-    return "* Unable to look up callsign.\n";
+    return 'Unable to look up callsign "' . $callsign . '".';
   } else {
     $name = ucwords( strtolower( htmlspecialchars( $json_decoded['name'] ) ) );
     return $name . ' ([http://callook.info/' . urlencode( $callsign ) . ' ' .
-      strtoupper( $callsign ) . "])\n";
+      strtoupper( $callsign ) . "])";
   }
 }
 
@@ -60,8 +60,10 @@ function CallsignLinkFunction( $parser, $callsign = '' ) {
 function CallsignListFunction( $parser, $callsign = '' ) {
   $callsigns = explode( ',', str_replace ( ' ', '', $callsign ) );
   $output = '';
-  foreach ( $callsigns as $call ) {
-    $output .= '* ' . FormatSimple( $call );
+  $formatted = array_map( 'FormatSimple', $callsigns );
+  sort( $formatted );
+  foreach ( $formatted as $i ) {
+    $output .= '* ' . $i . "\n";
   }
   return array ( $output );
 }
