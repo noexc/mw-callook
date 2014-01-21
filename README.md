@@ -1,15 +1,18 @@
 # MW-Callook
 
-A mediawiki interface to the Callook ham radio database.
+A mediawiki interface to the [Callook](http://callook.info) ham radio
+database.
 
-Currently only provides `{{#callsign: t3est}}` syntax, which renders the
-following HTML in the wiki page:
+Currently only provides a few small functions, but could be expanded with more
+if there was a want/need.
+
+- `{{#callsign: t3est}}` renders the following HTML in the wiki page:
 
 ```html
 Full M Name (<a href="http://callook.info/t3est">T3EST</a>)
 ```
 
-...but could easily be expanded to provide more info if desired.
+- `{{#callsignlink: t3est}}` simply links to t3est on callook.
 
 ## License
 

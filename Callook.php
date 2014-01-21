@@ -14,6 +14,7 @@ $wgExtensionMessagesFiles['Callook'] = dirname( __FILE__ ) . '/Callook.i18n.php'
 
 function CallookSetupParserFunction( &$parser ) {
   $parser->setFunctionHook( 'callsign', 'CallsignFunction' );
+  $parser->setFunctionHook( 'callsignlink', 'CallsignLinkFunction' );
   return true;
 }
 
@@ -32,6 +33,13 @@ function CallsignFunction( $parser, $callsign = '' ) {
   $name = ucwords( strtolower( htmlspecialchars( $json_decoded['name'] ) ) );
   $output = $name . ' (<a href="http://callook.info/' .
     urlencode( $callsign ) . '">' . strtoupper( $callsign ) . '</a>)';
+
+  return array ( $output, 'isHTML' => true );
+}
+
+function CallsignLinkFunction( $parser, $callsign = '' ) {
+  $output = '<a href="http://callook.info/' . urlencode( $callsign ) . '">' .
+    strtoupper( $callsign ) . '</a>';
 
   return array ( $output, 'isHTML' => true );
 }
